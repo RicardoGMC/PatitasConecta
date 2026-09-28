@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PatitasConecta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for indicators -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e'
+                        },
+                        accent: {
+                            500: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden text-gray-800">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg flex flex-col hidden md:flex h-full z-20">
+        <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+            <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+                <i class="fa-solid fa-paw text-xl"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 tracking-tight">PatitasConecta</h2>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-700 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+            </a>
+            <a href="#" onclick="showModuleAlert('Módulo de Animales')" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-brand-600 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-dog w-5"></i> Animales Disponibles
+            </a>
+            <a href="#" onclick="showModuleAlert('Módulo de Adopciones')" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-brand-600 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-heart w-5"></i> Adopciones
+            </a>
+            <a href="#" onclick="showModuleAlert('Módulo de Simulación')" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-brand-600 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-flask w-5"></i> Simulador de Escenarios
+            </a>
+            <a href="#" onclick="showModuleAlert('Módulo de Refugios')" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-brand-600 rounded-lg font-medium transition-colors">
+                <i class="fa-solid fa-house-chimney w-5"></i> Gestión de Refugios
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
+                <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <!-- Header -->
+        <header class="bg-white shadow-sm z-10 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-800">Panel de Control</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button class="text-gray-500 hover:text-brand-600 relative">
+                        <i class="fa-regular fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center font-bold border-2 border-white">3</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="User" class="w-10 h-10 rounded-full">
+                    <div class="hidden sm:block">
+                        <p class="text-sm font-semibold text-gray-700">Admin Refugio</p>
+                        <p class="text-xs text-gray-500">La Paz / El Alto</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+                
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-dog"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Animales Disponibles</p>
+                            <h3 class="text-2xl font-bold text-gray-800">124</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-heart-circle-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Adopciones (Mes)</p>
+                            <h3 class="text-2xl font-bold text-gray-800">38</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Tiempo Medio Espera</p>
+                            <h3 class="text-2xl font-bold text-gray-800">42 <span class="text-base font-normal text-gray-500">días</span></h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-house-chimney-user"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Capacidad Refugios</p>
+                            <h3 class="text-2xl font-bold text-gray-800">85%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts & Lists -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Chart -->
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 lg:col-span-2">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Tendencia de Adopciones vs Rescates</h3>
+                        <div class="relative h-72 w-full">
+                            <canvas id="adoptionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Actions -->
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Nuevos Ingresos</h3>
+                            <button class="text-sm text-brand-600 font-medium hover:underline">Ver todos</button>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Animal Item -->
+                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" onclick="viewAnimal('Max', 'Perro, Mestizo', 'Refugio La Paz')">
+                                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" class="w-12 h-12 rounded-lg object-cover" alt="Dog">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-800">Max</h4>
+                                    <p class="text-xs text-gray-500">Mestizo • 2 años</p>
+                                </div>
+                                <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-medium">Disponible</span>
+                            </div>
+                            <!-- Animal Item -->
+                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" onclick="viewAnimal('Luna', 'Gato, Siamés', 'Refugio El Alto')">
+                                <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" class="w-12 h-12 rounded-lg object-cover" alt="Cat">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-800">Luna</h4>
+                                    <p class="text-xs text-gray-500">Siamés • 6 meses</p>
+                                </div>
+                                <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded font-medium">En proceso</span>
+                            </div>
+                            <!-- Animal Item -->
+                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" onclick="viewAnimal('Rocky', 'Perro, Bulldog', 'Refugio Sur')">
+                                <img src="https://images.unsplash.com/photo-1517849845537-4d257902454a?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" class="w-12 h-12 rounded-lg object-cover" alt="Dog">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-800">Rocky</h4>
+                                    <p class="text-xs text-gray-500">Bulldog • 4 años</p>
+                                </div>
+                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded font-medium">Recién llegado</span>
+                            </div>
+                        </div>
+                        <button onclick="simulateScenario()" class="mt-6 w-full py-2 px-4 bg-brand-50 text-brand-700 rounded-lg font-medium border border-brand-100 hover:bg-brand-100 transition-colors flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-flask"></i> Probar Simulación
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Init Chart.js
+        const ctx = document.getElementById('adoptionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
+                datasets: [
+                    {
+                        label: 'Adopciones',
+                        data: [15, 19, 25, 22, 30, 28, 38],
+                        borderColor: '#14b8a6', // brand-500
+                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Rescates',
+                        data: [25, 22, 20, 35, 40, 30, 32],
+                        borderColor: '#f59e0b', // accent-500
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // SweetAlert Functions
+        function logout() {
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: "Saldrás de tu cuenta de PatitasConecta",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0d9488',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        function showModuleAlert(moduleName) {
+            Swal.fire({
+                title: moduleName,
+                text: `El ${moduleName.toLowerCase()} está en desarrollo. ¡Pronto estará disponible!`,
+                icon: 'info',
+                confirmButtonColor: '#0d9488'
+            });
+        }
+
+        function viewAnimal(name, breed, location) {
+            Swal.fire({
+                title: `Perfil de ${name}`,
+                html: `
+                    <div class="text-left space-y-2 mt-4">
+                        <p><strong>Raza/Tipo:</strong> ${breed}</p>
+                        <p><strong>Ubicación:</strong> ${location}</p>
+                        <p><strong>Estado:</strong> En espera de un hogar amoroso.</p>
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonText: 'Ver detalles completos',
+                confirmButtonColor: '#0d9488'
+            });
+        }
+
+        function simulateScenario() {
+            Swal.fire({
+                title: 'Simulador de Intervención',
+                input: 'select',
+                inputOptions: {
+                    'campana': 'Campaña de Esterilización',
+                    'feria': 'Feria de Adopción Masiva',
+                    'redes': 'Campaña Viral en Redes Sociales'
+                },
+                inputPlaceholder: 'Selecciona un escenario',
+                showCancelButton: true,
+                confirmButtonText: 'Simular',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d9488',
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: 'Calculando impacto...',
+                        html: 'Ejecutando modelo de simulación...',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    }).then(() => {
+                        Swal.fire({
+                            title: 'Resultados Estimados',
+                            html: `
+                                <div class="text-left">
+                                    <p class="text-green-600 font-bold mb-2"><i class="fa-solid fa-arrow-trend-up"></i> Incremento en adopciones: +25%</p>
+                                    <p class="text-blue-600 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> Reducción tiempo espera: -12 días</p>
+                                </div>
+                            `,
+                            icon: 'success',
+                            confirmButtonColor: '#0d9488'
+                        });
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
